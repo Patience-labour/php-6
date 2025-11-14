@@ -5,13 +5,83 @@ namespace Tests;
 use App\UserTableWrapper;
 use PHPUnit\Framework\TestCase;
 
-class UserTableWrapperExtendedTest extends TestCase
+require_once __DIR__ . '/../src/TableWrapperInterface.php';
+require_once __DIR__ . '/../src/UserTableWrapper.php';
+
+class UserTableWrapperTest extends TestCase
 {
   private UserTableWrapper $table;
 
   protected function setUp(): void
   {
     $this->table = new UserTableWrapper();
+  }
+
+  public function testInsert(): void
+  {
+    $this->table->insert(['id' => 1, 'name' => 'John']);
+    $result = $this->table->get();
+
+    $this->assertCount(1, $result);
+    $this->assertEquals(['id' => 1, 'name' => 'John'], $result[0]);
+  }
+
+  public function testGet(): void
+  {
+    $this->table->insert(['id' => 1, 'name' => 'John']);
+    $this->table->insert(['id' => 2, 'name' => 'Jane']);
+
+    $result = $this->table->get();
+
+    $this->assertCount(2, $result);
+    $this->assertEquals('John', $result[0]['name']);
+    $this->assertEquals('Jane', $result[1]['name']);
+  }
+
+  public function testUpdate(): void
+  {
+    $this->table->insert(['id' => 1, 'name' => 'John']);
+    $this->table->insert(['id' => 2, 'name' => 'Jane']);
+
+    $result = $this->table->update(1, ['name' => 'John Updated']);
+
+    $this->assertEquals(['id' => 1, 'name' => 'John Updated'], $result);
+
+    $allData = $this->table->get();
+    $this->assertEquals('John Updated', $allData[0]['name']);
+  }
+
+  public function testUpdateNonExisting(): void
+  {
+    $this->table->insert(['id' => 1, 'name' => 'John']);
+
+    $result = $this->table->update(999, ['name' => 'Non-existing']);
+
+    $this->assertEquals([], $result);
+  }
+
+  public function testDelete(): void
+  {
+    $this->table->insert(['id' => 1, 'name' => 'John']);
+    $this->table->insert(['id' => 2, 'name' => 'Jane']);
+
+    $this->table->delete(1);
+    $result = $this->table->get();
+
+    $this->assertCount(1, $result);
+
+    $this->assertContains(['id' => 2, 'name' => 'Jane'], $result);
+  }
+
+  public function testDeleteNonExisting(): void
+  {
+    $this->table->insert(['id' => 1, 'name' => 'John']);
+
+    $initialCount = count($this->table->get());
+    $this->table->delete(999);
+    $result = $this->table->get();
+
+    $this->assertCount($initialCount, $result);
   }
 
   public function testMultipleOperations(): void
@@ -29,15 +99,6 @@ class UserTableWrapperExtendedTest extends TestCase
     $this->table->delete(2);
 
     $this->assertCount(1, $this->table->get());
-  }
-
-  public function testUpdateWithoutId(): void
-  {
-    $this->table->insert(['name' => 'John', 'email' => 'john@example.com']);
-    $this->table->insert(['name' => 'Jane', 'email' => 'jane@example.com']);
-
-    $result = $this->table->update(1, ['name' => 'Updated']);
-    $this->assertEquals([], $result);
   }
 
   public function testInsertMaintainsOrder(): void

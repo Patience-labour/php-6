@@ -34,7 +34,7 @@ class ComposerStaticInitb7670d90fa803400168312d1b096854c
     public static $prefixDirsPsr4 = array (
         'Tests\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/tests',
+            0 => __DIR__ . '/../..' . '/project/tests',
         ),
         'PhpParser\\' => 
         array (
@@ -50,7 +50,7 @@ class ComposerStaticInitb7670d90fa803400168312d1b096854c
         ),
         'App\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src',
+            0 => __DIR__ . '/../..' . '/project/src',
         ),
     );
 
